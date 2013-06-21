@@ -7,7 +7,7 @@ setup(
     author_email='carlos.borroto@gmail.com',
     url="https://github.com/cjav/454-tools",
     packages=['fourfivefour', 'fourfivefour.test'],
-    scripts=["bin/454-tools"],
+    scripts=["scripts/454-tools"],
     description='Compilation of tools for processing 454 sequencing data..',
     long_description=open('README.md').read(),
     install_requires=[
