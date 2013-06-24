@@ -12,7 +12,11 @@ Available commands are:
 """
 
 import sys
-from docopt import docopt
+try:
+    from docopt import docopt
+except ImportError:
+    sys.exit("""Error: docopt is required by 454-tools.
+https://pypi.python.org/pypi/docopt""")
 from tools import merge, mid_split
 
 def main():

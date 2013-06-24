@@ -2,9 +2,27 @@ import sys
 import fileinput
 import warnings
 import collections
-import Levenshtein
-from docopt import docopt
-from Bio import SeqIO
+
+# import python-levenshtein
+try:
+    import Levenshtein
+except ImportError:
+    sys.exit("""Error: Python Levenshtein is required by 454-tools
+https://pypi.python.org/pypi/python-Levenshtein""")
+
+# import docopt
+try:
+    from docopt import docopt
+except ImportError:
+    sys.exit("""Error: docopt is required by 454-tools.
+https://pypi.python.org/pypi/docopt""")
+
+#import SeqIO from Bio (biopython)
+try:
+    from Bio import SeqIO
+except ImportError:
+    sys.exit("""Error: Biopython is required by 454-tools.
+https://pypi.python.org/pypi/biopython""")
 
 def merge(options):
     """
