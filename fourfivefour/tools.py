@@ -49,7 +49,7 @@ usage: 454-tools mid-split [options] [--] <mid_file> [<input_file>...]
 options:
     -h --help                           Show this screen.
 
-    -q --fastq                          Input file or stdin is in FASTQ format.
+    -q --fastq                          Input file or stdin is in FASTQ format. By default FASTA format is expected.
     -k --keep-barcode                   Do not trim the barcode.
     -d INTEGER --max-distance=INTEGER   Max Levenshtein's distance when looking for mutated barcodes [default: 3].
     -s INTEGER --barcode-size=INTEGER   Barcode size [default: 11].
