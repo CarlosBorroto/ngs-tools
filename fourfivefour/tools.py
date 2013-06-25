@@ -3,25 +3,18 @@ import fileinput
 import warnings
 import collections
 
-# import python-levenshtein
-try:
-    import Levenshtein
-except ImportError:
-    sys.exit("""Error: Python Levenshtein is required by 454-tools
-https://pypi.python.org/pypi/python-Levenshtein""")
-
 # import docopt
 try:
     from docopt import docopt
 except ImportError:
-    sys.exit("""Error: docopt is required by 454-tools.
+    sys.exit("""Error: docopt is required by '454-tools'.
 https://pypi.python.org/pypi/docopt""")
 
 #import SeqIO from Bio (biopython)
 try:
     from Bio import SeqIO
 except ImportError:
-    sys.exit("""Error: Biopython is required by 454-tools.
+    sys.exit("""Error: Biopython is required by '454-tools'.
 https://pypi.python.org/pypi/biopython""")
 
 def merge(options):
@@ -61,6 +54,13 @@ options:
     -d INTEGER --max-distance=INTEGER   Max Levenshtein's distance when looking for mutated barcodes [default: 3].
     -s INTEGER --barcode-size=INTEGER   Barcode size [default: 11].
     """
+
+    # import python-levenshtein
+    try:
+        import Levenshtein
+    except ImportError:
+        sys.exit("""Error: Python Levenshtein is required by '454-tools mid-split'
+    https://pypi.python.org/pypi/python-Levenshtein""")
 
     options_mid_split = docopt(mid_split.__doc__, argv=options)
     m = options_mid_split['<mid_file>']
