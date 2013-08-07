@@ -21,7 +21,7 @@ from tools import merge, mid_split
 
 def main():
     try:
-        options = docopt(__doc__, version='0.1.1', options_first=True)
+        options = docopt(__doc__, version='0.1.2', options_first=True)
 
         if options['<command>'] == 'merge':
             merge([options['<command>']] + options['<args>'])

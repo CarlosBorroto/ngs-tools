@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='454-tools',
-    version='0.1.1',
+    version='0.1.2',
     author='Carlos Borroto',
     author_email='carlos.borroto@gmail.com',
     url="https://github.com/cjav/454-tools",
