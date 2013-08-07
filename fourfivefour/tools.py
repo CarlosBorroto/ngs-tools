@@ -64,6 +64,7 @@ options:
     -d INTEGER --max-distance=INTEGER   Max Levenshtein's distance when looking for mutated barcodes
                                         [default: 3].
     -s INTEGER --barcode-size=INTEGER   Barcode size [default: 11].
+    -p PREFIX --prefix=PREFIX           Prefix for output files [default: ].
     """
 
     options_mid_split = docopt(mid_split.__doc__, argv=options)
@@ -74,9 +75,10 @@ options:
     k = options_mid_split['--keep-barcode']
     d = int(options_mid_split['--max-distance'])
     s = int(options_mid_split['--barcode-size'])
+    p = options_mid_split['--prefix']
 
     try:
-        _split_reads(i, m, b, f, d, s, k)
+        _split_reads(i, m, b, p, f, d, s, k)
     except ValueError as e:
         print e
 
@@ -92,7 +94,7 @@ def _open_output_handle(output):
 
     return handle
 
-def _split_reads(input_files, barcode_file, barcode_list, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
+def _split_reads(input_files, barcode_file, barcode_list, prefix, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
     """
     Given a fasta/fastq set of reads files and a file with the barcode index. Create one 
     fasta/fastq file for each barcode_name based on the closest matching barcode.
@@ -108,7 +110,7 @@ def _split_reads(input_files, barcode_file, barcode_list, format="fasta", max_di
     counts = collections.defaultdict(int)
  
     try:
-        outfs = dict([(g, open("{0}.ld.{1}.{2}".format(g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+        outfs = dict([(g, open("{0}{1}.ld.{2}.{3}".format(prefix, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
         try:
             f = fileinput.input(input_files)
             try:
