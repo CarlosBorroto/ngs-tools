@@ -69,7 +69,7 @@ options:
     options_mid_split = docopt(mid_split.__doc__, argv=options)
     m = options_mid_split['<mid_file>']
     i = options_mid_split['<input_file>']
-    b = options_mid_split['--barcode']
+    b = list(set(options_mid_split['--barcode']))
     f = 'fastq' if options_mid_split['--fastq'] else 'fasta'
     k = options_mid_split['--keep-barcode']
     d = int(options_mid_split['--max-distance'])
@@ -162,9 +162,15 @@ class BarcodeIndex:
                     self.cache[barcode] = barcode_name
             self.barcodes = self.cache.keys()
             self.barcode_names = self.cache.values()
+            barcode_missing = list(set(barcode_list) - set(self.barcode_names))
+            if barcode_missing:
+                print "Some barcodes could not be found in the <mid_file> file. Barcodes not present: {0}".format(barcode_missing)
+                raise ValueError("Please check if this is the correct <mid_file> or the barcodes are spelled correctly.")
         except IOError as e:
             print "Cannot open file '{0}'. Error: {1}".format(e.filename, e.strerror)
             raise ValueError("Please supply a valid <mid_file>.")
+        except ValueError:
+            raise
         self.max_distance = max_distance
  
     def find_barcode(self, barcode):
