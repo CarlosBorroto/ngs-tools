@@ -1,4 +1,4 @@
-454-tools
+ngs-tools
 =========
 
-Compilation of tools for processing 454 sequencing data.
+Compilation of tools for processing NGS sequencing data.

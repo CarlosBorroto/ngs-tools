@@ -7,26 +7,26 @@ import collections
 try:
     import Levenshtein
 except ImportError:
-    sys.exit("""Error: Python Levenshtein is required by '454-tools'
+    sys.exit("""Error: Python Levenshtein is required by 'ngs-tools'
 https://pypi.python.org/pypi/python-Levenshtein""")
 
 # import docopt
 try:
     from docopt import docopt
 except ImportError:
-    sys.exit("""Error: docopt is required by '454-tools'.
+    sys.exit("""Error: docopt is required by 'ngs-tools'.
 https://pypi.python.org/pypi/docopt""")
 
 #import SeqIO from Bio (biopython)
 try:
     from Bio import SeqIO
 except ImportError:
-    sys.exit("""Error: Biopython is required by '454-tools'.
+    sys.exit("""Error: Biopython is required by 'ngs-tools'.
 https://pypi.python.org/pypi/biopython""")
 
-def merge(options):
+def merge_fna_qual(options):
     """
-usage: 454-tools merge [options] [--] <fna_file> <qual_file>
+usage: ngs-tools merge-fna-qual [options] [--] <fna_file> <qual_file>
 
 options:
     -h --help                       Show this screen.
@@ -34,13 +34,13 @@ options:
     -o FILENAME --output=FILENAME   Write FASTQ output to FILENAME.
     """
 
-    options_merge = docopt(merge.__doc__, argv=options)
+    options_merge_fna_qual = docopt(merge_fna_qual.__doc__, argv=options)
 
     try:
-        with _open_output_handle(options_merge['--output']) as o:
+        with _open_output_handle(options_merge_fna_qual['--output']) as o:
             try:
-                with open(options_merge['<fna_file>']) as f:
-                    with open(options_merge['<qual_file>']) as q: 
+                with open(options_merge_fna_qual['<fna_file>']) as f:
+                    with open(options_merge_fna_qual['<qual_file>']) as q: 
                         records = SeqIO.QualityIO.PairedFastaQualIterator(f, q)
                         count = SeqIO.write(records, o, "fastq")
             except IOError as e:
@@ -49,15 +49,15 @@ options:
     except ValueError as e:
         print e
 
-def mid_split(options):
+def split_by_barcode(options):
     """
-usage: 454-tools mid-split [--barcode BARCODE]... [options] [--] <mid_file> [<input_file>...]
+usage: ngs-tools split-by-barcode [--barcode BARCODE]... [options] [--] <barcode_file> [<input_file>...]
 
 options:
     -h --help                           Show this screen.
 
-    -b BARCODE --barcode=BARCODE        Barcode to use from the <mid_file>. Allow multiple appearances.
-                                        By default all barcodes in the <mid_file> are used.
+    -b BARCODE --barcode=BARCODE        Barcode to use from the <barcode_file>. Allow multiple appearances.
+                                        By default all barcodes in the <barcode_file> are used.
     -q --fastq                          Input file or stdin is in FASTQ format. By default FASTA format
                                         is expected.
     -k --keep-barcode                   Do not trim the barcode.
@@ -67,15 +67,15 @@ options:
     -p PREFIX --prefix=PREFIX           Prefix for output files [default: ].
     """
 
-    options_mid_split = docopt(mid_split.__doc__, argv=options)
-    m = options_mid_split['<mid_file>']
-    i = options_mid_split['<input_file>']
-    b = list(set(options_mid_split['--barcode']))
-    f = 'fastq' if options_mid_split['--fastq'] else 'fasta'
-    k = options_mid_split['--keep-barcode']
-    d = int(options_mid_split['--max-distance'])
-    s = int(options_mid_split['--barcode-size'])
-    p = options_mid_split['--prefix']
+    options_split_by_barcode = docopt(split_by_barcode.__doc__, argv=options)
+    m = options_split_by_barcode['<barcode_file>']
+    i = options_split_by_barcode['<input_file>']
+    b = list(set(options_split_by_barcode['--barcode']))
+    f = 'fastq' if options_split_by_barcode['--fastq'] else 'fasta'
+    k = options_split_by_barcode['--keep-barcode']
+    d = int(options_split_by_barcode['--max-distance'])
+    s = int(options_split_by_barcode['--barcode-size'])
+    p = options_split_by_barcode['--prefix']
 
     try:
         _split_reads(i, m, b, p, f, d, s, k)
@@ -166,11 +166,11 @@ class BarcodeIndex:
             self.barcode_names = self.cache.values()
             barcode_missing = list(set(barcode_list) - set(self.barcode_names))
             if barcode_missing:
-                print "Some barcodes could not be found in the <mid_file> file. Barcodes not present: {0}".format(barcode_missing)
-                raise ValueError("Please check if this is the correct <mid_file> or the barcodes are spelled correctly.")
+                print "Some barcodes could not be found in the <barcode_file> file. Barcodes not present: {0}".format(barcode_missing)
+                raise ValueError("Please check if this is the correct <barcode_file> or the barcodes are spelled correctly.")
         except IOError as e:
             print "Cannot open file '{0}'. Error: {1}".format(e.filename, e.strerror)
-            raise ValueError("Please supply a valid <mid_file>.")
+            raise ValueError("Please supply a valid <barcode_file>.")
         except ValueError:
             raise
         self.max_distance = max_distance

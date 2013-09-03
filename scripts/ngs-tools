@@ -3,6 +3,6 @@
 import os, sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-import fourfivefour.main
+import ngs.main
 
-fourfivefour.main.main()
+ngs.main.main()
