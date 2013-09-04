@@ -51,20 +51,32 @@ options:
 
 def split_by_barcode(options):
     """
-usage: ngs-tools split-by-barcode [--barcode BARCODE]... [options] [--] <barcode_file> [<input_file>...]
+usage: ngs-tools split-by-barcode [--barcode BARCODE]...
+                    [--prefix PREFIX | --galaxy GALAXY_ID]
+                    [options] [--] <barcode_file> [<input_file>...]
 
 options:
-    -h --help                           Show this screen.
+  -h --help                               Show this screen.
 
-    -b BARCODE --barcode=BARCODE        Barcode to use from the <barcode_file>. Allow multiple appearances.
-                                        By default all barcodes in the <barcode_file> are used.
-    -q --fastq                          Input file or stdin is in FASTQ format. By default FASTA format
-                                        is expected.
-    -k --keep-barcode                   Do not trim the barcode.
-    -d INTEGER --max-distance=INTEGER   Max Levenshtein's distance when looking for mutated barcodes
-                                        [default: 3].
-    -s INTEGER --barcode-size=INTEGER   Barcode size [default: 11].
-    -p PREFIX --prefix=PREFIX           Prefix for output files [default: ].
+  -b BARCODE --barcode=BARCODE            Barcode to use from the 
+                                          <barcode_file>. Allow multiple
+                                          appearances. By default all barcodes
+                                          in the <barcode_file> are used.
+  -q --fastq                              Input file or stdin is in FASTQ
+                                          format. By default FASTA format is
+                                          expected.
+  -k --keep-barcode                       Do not trim the barcode.
+  -d INTEGER --max-distance=INTEGER       Max Levenshtein's distance when
+                                          looking for mutated barcodes
+                                          [default: 3].
+  -s INTEGER --barcode-size=INTEGER       Barcode size [default: 11].
+  -p PREFIX --prefix=PREFIX               Prefix for splitted output files.
+  -g GALAXY_ID --galaxy=GALAXY_ID         Name splitted output files in away
+                                          compatible with galaxy multiple
+                                          outputs.
+  -r REPORT_OUTPUT --report=REPORT_OUTPUT Write report output to REPORT_OUTPUT.
+  -o OUTPUT --output=OUTPUT               Write splitted output files to OUTPUT
+                                          directory [default: .]
     """
 
     options_split_by_barcode = docopt(split_by_barcode.__doc__, argv=options)
@@ -75,10 +87,20 @@ options:
     k = options_split_by_barcode['--keep-barcode']
     d = int(options_split_by_barcode['--max-distance'])
     s = int(options_split_by_barcode['--barcode-size'])
-    p = options_split_by_barcode['--prefix']
+    p = options_split_by_barcode['--prefix'] if options_split_by_barcode['--prefix'] else ''
+    g = options_split_by_barcode['--galaxy'] if options_split_by_barcode['--galaxy'] else ''
+    r = options_split_by_barcode['--report']
+    o = options_split_by_barcode['--output'].rstrip('/')
 
     try:
-        _split_reads(i, m, b, p, f, d, s, k)
+        report = _split_reads(i, m, b, p, g, o, f, d, s, k)
+    except ValueError as e:
+        print e
+
+    try:
+        with _open_output_handle(r) as fh:
+            for k, v in report:
+                fh.write("{0}\t{1}\n".format(k, v))
     except ValueError as e:
         print e
 
@@ -94,7 +116,7 @@ def _open_output_handle(output):
 
     return handle
 
-def _split_reads(input_files, barcode_file, barcode_list, prefix, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
+def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
     """
     Given a fasta/fastq set of reads files and a file with the barcode index. Create one 
     fasta/fastq file for each barcode_name based on the closest matching barcode.
@@ -110,7 +132,10 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, format="fasta"
     counts = collections.defaultdict(int)
  
     try:
-        outfs = dict([(g, open("{0}{1}.ld.{2}.{3}".format(prefix, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+        if galaxy_id:
+            outfs = dict([(g, open("{0}/primary_{1}_{2}.ld.{3}_visible_{4}".format(output, galaxy_id, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+        else:
+            outfs = dict([(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
         try:
             f = fileinput.input(input_files)
             try:
@@ -125,8 +150,7 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, format="fasta"
                     SeqIO.write([r], outfs[barcode_name], format)
                     counts[barcode_name] += 1
 
-                for k, v in sorted(counts.items(), key=lambda t: t[0] == "Unassigned"):
-                    print k, v
+                report = sorted(counts.items(), key=lambda t: t[0] == "Unassigned")
             finally:
                 f.close()
         except IOError as e:
@@ -138,6 +162,8 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, format="fasta"
     except IOError as e:
         print "Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror)
         raise ValueError("Please make sure you can write to output file: '{0}'.".format(e.filename))
+
+    return report
 
 class BarcodeIndex:
     """
