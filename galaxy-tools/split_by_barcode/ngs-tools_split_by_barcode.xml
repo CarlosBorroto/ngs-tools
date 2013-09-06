@@ -1,0 +1,86 @@
+<tool id="ngs-tools_split_by_barcode" name="Barcode Splitter (ngs-tools)" force_history_refresh="True">
+	<description></description>
+    <requirements>
+        <requirement type="package" version="0.1.4">ngs-tools</requirement>
+    </requirements>
+    <command>
+        ngs-tools split-by-barcode
+            $trim_barcode $input_format.format
+            --barcode-size $barcode_length --max-distance $max_distance
+            #for $i in $barcodes
+              --barcode ${i.barcode}
+            #end for
+            --report $output1 --galaxy $output1.id --output $__new_file_path__
+            $barcode_index
+            #for $i in $input_format.inputs
+              ${i.input}
+            #end for
+    </command>
+
+	<inputs>
+        <conditional name="input_format">
+            <param name="format" type="select" label="Input format">
+                <option value="--fastq" selected="true">Fastq</option>
+                <option value="">Fasta</option>
+            </param>
+            <when value="--fastq">
+                <repeat name="inputs" title="Dataset" help="Datasets to split.">
+                    <param name="input" type="data" label="Dataset to split" format="fastq,fastqsanger,fastqsolexa,fastqillumina" />
+                </repeat>
+            </when>
+            <when value="">
+                <repeat name="inputs" title="Dataset" help="Datasets to split.">
+                    <param name="input" type="data" label="Dataset to split" format="fasta" />
+                </repeat>
+            </when>
+        </conditional>
+        <param format="tabular" name="barcode_index" type="data" label="Barcodes index" help="See below for description." />
+        <param name="barcode_length" type="integer" size="3" value="11" label="Barcode length" help="Please specify the barcode length." />
+        <repeat name="barcodes" title="Barcode" help="Barcodes to use. By default all barcodes with the correct length in the index are used. By using this option you can limit which ones to use.">
+            <param name="barcode" type="text" label="Barcode to use" />
+        </repeat>
+        <param name="trim_barcode" type="select" label="Trim the barcode" help="By default barcodes are trimmed from the resulting splitted datasets">
+            <option value="" selected="true">Yes</option>
+            <option value="--keep-barcode">No</option>
+        </param>
+        <param name="max_distance" type="integer" size="3" value="2" label="Number of allowed polymorphisms" help="Max Levenshtein's distance when looking for mutated barcodes." />
+	</inputs>
+	
+	<outputs>
+		<data format="interval" name="output1" />
+	</outputs>
+<help>
+
+**What it does**
+
+This tool splits FASTQ or FASTA datasets into several datasets, using barcodes as the split criteria.
+
+--------
+
+**Barcode index format**
+
+Barcode index datasets are simple tab separated files.
+Each line should contain an identifier (descriptive name for the barcode), and the barcode itself (A/C/G/T), separated by a TAB character.
+Example::
+
+    RL001   ACACGACGACT
+    RL002   ACACGTAGTAT
+    RL003   ACACTACTCGT
+    RL004   ACGACACGTAT
+    RL005   ACGAGTAGACT
+    
+For each barcode, a new FASTQ or FASTA dataset will be created (with the barcode's identifier as part of the dataset name).
+Sequences matching the barcode will be stored in the appropriate dataset.
+
+One additional FASTQ or FASTA dataset will be created (the 'Unassigned' dataset), where sequences not matching any barcode will be stored.
+
+The output of this tool is one history dataset per each barcode provided plus a report with the split counts.
+
+------
+
+This tool is based on `ngs-tools`__ by Carlos Borroto &lt;carlos.borroto@gmail.com&gt;.
+
+ .. __: https://github.com/cjav/ngs-tools/
+ 
+</help>
+</tool>

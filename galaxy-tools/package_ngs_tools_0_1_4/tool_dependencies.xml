@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<tool_dependency>
+    <package name="biopython" version="1.61">
+        <repository name="package_biopython_1_61" owner="biopython" prior_installation_required="True" />
+    </package>
+    <package name="ngs-tools" version="0.1.4">
+        <install version="1.0">
+            <actions>
+                <action type="setup_virtualenv">ngs-tools==0.1.4</action>
+            </actions>
+        </install>
+    </package>
+</tool_dependency>

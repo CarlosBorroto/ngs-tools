@@ -1,0 +1,31 @@
+<tool id="ngs-tools_merge_fna_qual" name="454's FNA/QUAL Merger (ngs-tools)" force_history_refresh="True" version="1.0.0">
+	<description></description>
+    <requirements>
+        <requirement type="package" version="0.1.4">ngs-tools</requirement>
+    </requirements>
+    <command>
+        ngs-tools merge-fna-qual --output $output_file $fasta_file $qual_file
+    </command>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA File" />
+        <param name="qual_file" type="data" format="qual454" label="Quality Score File" />
+    </inputs>
+    <outputs>
+        <data name="output_file" format="fastqsanger" />
+    </outputs>
+<help>
+
+**What it does**
+
+This tool joins a FASTA file to a Quality Score file, creating a single FASTQ block for each read.
+
+Use this tool to convert 454-type output to FASTQ.
+
+--------
+
+This tool is based on `ngs-tools`__ by Carlos Borroto &lt;carlos.borroto@gmail.com&gt;.
+
+ .. __: https://github.com/cjav/ngs-tools/
+ 
+</help>
+</tool>
