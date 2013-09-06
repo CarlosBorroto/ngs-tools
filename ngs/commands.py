@@ -133,7 +133,7 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
  
     try:
         if galaxy_id:
-            outfs = dict([(g, open("{0}/primary_{1}_{2}.ld.{3}_visible_{4}".format(output, galaxy_id, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+            outfs = dict([(g, open("{0}/primary_{1}_{2}_visible_{3}".format(output, galaxy_id, g, format), "w")) for g in index.barcode_names + ["Unassigned"]])
         else:
             outfs = dict([(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
         try:
