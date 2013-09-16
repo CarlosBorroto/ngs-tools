@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ngs-tools',
-    version='0.1.4',
+    version='0.1.5',
     author='Carlos Borroto',
     author_email='carlos.borroto@gmail.com',
     url="https://github.com/cjav/ngs-tools",

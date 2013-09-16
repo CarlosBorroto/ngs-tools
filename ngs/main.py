@@ -21,7 +21,7 @@ from commands import merge_fna_qual, split_by_barcode
 
 def main():
     try:
-        options = docopt(__doc__, version='0.1.4', options_first=True)
+        options = docopt(__doc__, version='0.1.5', options_first=True)
 
         if options['<command>'] == 'merge-fna-qual':
             merge_fna_qual([options['<command>']] + options['<args>'])
