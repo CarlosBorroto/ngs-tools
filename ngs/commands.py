@@ -51,17 +51,16 @@ options:
 
 def split_by_barcode(options):
     """
-usage: ngs-tools split-by-barcode [--barcode BARCODE]...
-                    [--prefix PREFIX | --galaxy GALAXY_ID]
+usage: ngs-tools split-by-barcode [--prefix PREFIX | --galaxy GALAXY_ID]
                     [options] [--] <barcode_file> [<input_file>...]
 
 options:
   -h --help                               Show this screen.
 
-  -b BARCODE --barcode=BARCODE            Barcode to use from the 
-                                          <barcode_file>. Allow multiple
-                                          appearances. By default all barcodes
-                                          in the <barcode_file> are used.
+  -b BARCODES --barcodes=BARCODES         Comma separate list of barcodes to use
+                                          from the  <barcode_file>. By default
+                                          all barcodes in the <barcode_file> are
+                                          used.
   -q --fastq                              Input file or stdin is in FASTQ
                                           format. By default FASTA format is
                                           expected.
@@ -82,7 +81,7 @@ options:
     options_split_by_barcode = docopt(split_by_barcode.__doc__, argv=options)
     m = options_split_by_barcode['<barcode_file>']
     i = options_split_by_barcode['<input_file>']
-    b = list(set(options_split_by_barcode['--barcode']))
+    b = list(set(options_split_by_barcode['--barcodes'].split(',')))
     f = 'fastq' if options_split_by_barcode['--fastq'] else 'fasta'
     k = options_split_by_barcode['--keep-barcode']
     d = int(options_split_by_barcode['--max-distance'])
