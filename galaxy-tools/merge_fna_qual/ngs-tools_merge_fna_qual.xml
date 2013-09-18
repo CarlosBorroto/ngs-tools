@@ -1,7 +1,7 @@
-<tool id="ngs-tools_merge_fna_qual" name="454's FNA/QUAL Merger (ngs-tools)" force_history_refresh="True" version="1.0.0">
+<tool id="ngs-tools_merge_fna_qual" name="454's FNA/QUAL Merger (ngs-tools)" version="1.0.1">
 	<description></description>
     <requirements>
-        <requirement type="package" version="0.1.4">ngs-tools</requirement>
+        <requirement type="package" version="0.1.6">ngs-tools</requirement>
     </requirements>
     <command>
         ngs-tools merge-fna-qual --output $output_file $fasta_file $qual_file

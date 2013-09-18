@@ -21,7 +21,7 @@ from commands import merge_fna_qual, split_by_barcode
 
 def main():
     try:
-        options = docopt(__doc__, version='0.1.5', options_first=True)
+        options = docopt(__doc__, version='0.1.6', options_first=True)
 
         if options['<command>'] == 'merge-fna-qual':
             merge_fna_qual([options['<command>']] + options['<args>'])
@@ -31,6 +31,8 @@ def main():
             exit("%r is not a ngs-tools command. See 'ngs-tools --help'." % options['<command>'])
     except KeyboardInterrupt:
         pass
+    except ValueError as e:
+        print e
 
 if __name__ == '__main__':
         main()

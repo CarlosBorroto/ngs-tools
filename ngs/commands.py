@@ -81,7 +81,7 @@ options:
     options_split_by_barcode = docopt(split_by_barcode.__doc__, argv=options)
     m = options_split_by_barcode['<barcode_file>']
     i = options_split_by_barcode['<input_file>']
-    b = list(set(options_split_by_barcode['--barcodes'].split(',')))
+    b = list(set(options_split_by_barcode['--barcodes'].split(','))) if options_split_by_barcode['--barcodes'] else []
     f = 'fastq' if options_split_by_barcode['--fastq'] else 'fasta'
     k = options_split_by_barcode['--keep-barcode']
     d = int(options_split_by_barcode['--max-distance'])
@@ -93,15 +93,15 @@ options:
 
     try:
         report = _split_reads(i, m, b, p, g, o, f, d, s, k)
-    except ValueError as e:
-        print e
+    except:
+        raise
 
     try:
         with _open_output_handle(r) as fh:
             for k, v in report:
                 fh.write("{0}\t{1}\n".format(k, v))
-    except ValueError as e:
-        print e
+    except:
+        raise
 
 def _open_output_handle(output):
     try:
@@ -180,7 +180,10 @@ class BarcodeIndex:
                     l = l.rstrip('\n')
                     if l.startswith("#") or l == "":
                         continue
-                    barcode_name, barcode = l.split("\t")
+                    try:
+                        barcode_name, barcode = l.split("\t")
+                    except ValueError:
+                        raise ValueError("Malformed line on barcode index file. Line content: '{0}'".format(l))
                     if len(barcode) != self.barcode_size:
                         warnings.warn("Ignoring barcode '{0}' as is not of correct length.".format(barcode))
                         continue
