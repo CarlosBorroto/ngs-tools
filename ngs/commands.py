@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import fileinput
 import warnings
 import collections
@@ -100,6 +100,36 @@ options:
         with _open_output_handle(r) as fh:
             for k, v in report:
                 fh.write("{0}\t{1}\n".format(k, v))
+    except:
+        raise
+
+def seq_convert(options):
+    """
+usage: ngs-tools seq-convert [options] [--] <input_file>
+
+options:
+    -h --help                       Show this screen.
+
+    -o FILENAME --output=FILENAME       Write output to FILENAME.
+    -i FORMAT, --input-format FORMAT    Input format [default: fasta]
+    -f FORMAT, --output-format FORMAT   Output format [default: fasta]
+    -u, --use-filename-as-id            Use filename as id. Helpful on input
+                                        formats as 'abi'.
+    """
+
+    options_seq_convert = docopt(seq_convert.__doc__, argv=options)
+    input_file = options_seq_convert['<input_file>']
+    output = options_seq_convert['--output']
+    in_format = options_seq_convert['--input-format']
+    out_format = options_seq_convert['--output-format']
+    id_filename = options_seq_convert['--use-filename-as-id']
+
+    try:
+        with _open_output_handle(output) as out_fh:
+            for seq in SeqIO.parse(open(input_file, 'rb'), in_format):
+                if id_filename:
+                    seq.id = os.path.splitext(input_file)[0]
+                SeqIO.write([seq], out_fh, out_format)
     except:
         raise
 
