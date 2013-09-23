@@ -45,9 +45,9 @@ options:
                         count = SeqIO.write(records, o, "fastq")
             except IOError as e:
                 print "Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror)
-                print "Please provide valid <fna_file> and <qual_file>."
-    except ValueError as e:
-        print e
+                raise ValueError("Please provide valid <fna_file> and <qual_file>.")
+    except:
+        raise
 
 def split_by_barcode(options):
     """
@@ -105,7 +105,7 @@ options:
 
 def seq_convert(options):
     """
-usage: ngs-tools seq-convert [options] [--] <input_file>
+usage: ngs-tools seq-convert [options] [--] [<input_file>...]
 
 options:
     -h --help                       Show this screen.
@@ -113,25 +113,34 @@ options:
     -o FILENAME --output=FILENAME       Write output to FILENAME.
     -i FORMAT, --input-format FORMAT    Input format [default: fasta]
     -f FORMAT, --output-format FORMAT   Output format [default: fasta]
-    -u, --use-filename-as-id            Use filename as id. Helpful on input
-                                        formats as 'abi'.
     """
 
     options_seq_convert = docopt(seq_convert.__doc__, argv=options)
-    input_file = options_seq_convert['<input_file>']
+    inputs = options_seq_convert['<input_file>']
     output = options_seq_convert['--output']
     in_format = options_seq_convert['--input-format']
     out_format = options_seq_convert['--output-format']
-    id_filename = options_seq_convert['--use-filename-as-id']
 
+    for i in inputs:
+        mode = "rb" if in_format in ['abi'] else "r" 
+        try:
+            with _open_input_handle(i, mode=mode) as in_fh:
+                with _open_output_handle(output) as out_fh:
+                    seqs = SeqIO.parse(in_fh, in_format)
+                    SeqIO.write(seqs, out_fh, out_format)
+        except:
+            raise
+
+def _open_input_handle(i, mode="r"):
     try:
-        with _open_output_handle(output) as out_fh:
-            for seq in SeqIO.parse(open(input_file, 'rb'), in_format):
-                if id_filename:
-                    seq.id = os.path.splitext(input_file)[0]
-                SeqIO.write([seq], out_fh, out_format)
-    except:
-        raise
+        if i:
+            handle = open(i, mode)
+        else:
+            handle = sys.stdin
+    except IOError as e:
+        raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
+
+    return handle
 
 def _open_output_handle(output):
     try:
@@ -140,8 +149,7 @@ def _open_output_handle(output):
         else:
             handle = sys.stdout
     except IOError as e:
-        print "Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror)
-        raise ValueError("Please make sure you can write to output file: '{0}'.".format(e.filename))
+        raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
 
     return handle
 
@@ -155,7 +163,7 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
     """
     try:
         index = BarcodeIndex(barcode_file, barcode_list, max_distance, barcode_size)
-    except ValueError:
+    except:
         raise
  
     counts = collections.defaultdict(int)
@@ -183,14 +191,12 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
             finally:
                 f.close()
         except IOError as e:
-            print "Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror)
-            raise ValueError("Please supply valid fasta or fastq <input_file>.")
+            raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
         finally:            
             for o in outfs.values():
                 o.close()
     except IOError as e:
-        print "Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror)
-        raise ValueError("Please make sure you can write to output file: '{0}'.".format(e.filename))
+        raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
 
     return report
 

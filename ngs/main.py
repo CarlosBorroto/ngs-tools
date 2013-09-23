@@ -34,8 +34,8 @@ def main():
             exit("%r is not a ngs-tools command. See 'ngs-tools --help'." % options['<command>'])
     except KeyboardInterrupt:
         pass
-#    except ValueError as e:
-#        print e
+    except ValueError as e:
+        print e
 
 if __name__ == '__main__':
         main()
