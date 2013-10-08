@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, random
 import fileinput
 import warnings
 import collections
@@ -111,8 +111,8 @@ options:
     -h --help                       Show this screen.
 
     -o FILENAME --output=FILENAME       Write output to FILENAME.
-    -i FORMAT, --input-format FORMAT    Input format [default: fasta]
-    -f FORMAT, --output-format FORMAT   Output format [default: fasta]
+    -i FORMAT, --input-format FORMAT    Input format [default: fasta].
+    -f FORMAT, --output-format FORMAT   Output format [default: fasta].
     """
 
     options_seq_convert = docopt(seq_convert.__doc__, argv=options)
@@ -121,15 +121,55 @@ options:
     in_format = options_seq_convert['--input-format']
     out_format = options_seq_convert['--output-format']
 
-    for i in inputs:
-        mode = "rb" if in_format in ['abi'] else "r" 
-        try:
-            with _open_input_handle(i, mode=mode) as in_fh:
-                with _open_output_handle(output) as out_fh:
-                    seqs = SeqIO.parse(in_fh, in_format)
-                    SeqIO.write(seqs, out_fh, out_format)
-        except:
-            raise
+    try:
+        with _open_output_handle(output) as out_fh:
+            for i in inputs:
+                mode = "rb" if in_format in ['abi'] else "r" 
+                try:
+                    with _open_input_handle(i, mode=mode) as in_fh:
+                            seqs = SeqIO.parse(in_fh, in_format)
+                            SeqIO.write(seqs, out_fh, out_format)
+                except:
+                    raise
+    except:
+        raise
+
+def sample(options):
+    """
+usage: ngs-tools sample [options] [--] <input_file> [<paired_input_file>]
+
+options:
+    -h --help                       Show this screen.
+
+    -o FILENAME --output=FILENAME       Write sampled records to FILENAME.
+                                        Required if using paired data. 
+    -p FILENAME, --output-pair FILENAME Write sampled records from the paired
+                                        input to FILENAME. Required if using
+                                        paired data.
+    -i FORMAT, --input-format FORMAT    Input format [default: fastq].
+    -s SIZE, --sample-size SIZE         Integer describing how many records to
+                                        sample [default: 100].
+
+    Supported formats: fastq.
+    """
+
+    SUPPORTED_FORMATS = ['fastq']
+    options_sample = docopt(sample.__doc__, argv=options)
+    in_file = options_sample['<input_file>']
+    in_file_pair = options_sample['<paired_input_file>']
+    out_file = options_sample['--output']
+    out_file_pair = options_sample['--output-pair']
+    in_format = options_sample['--input-format']
+    if in_format not in SUPPORTED_FORMATS:
+        raise ValueError("Unsupported format provided: '{0}'.".format(in_format))
+    sample_size = options_sample['--sample-size']
+
+    try:
+        mode = "r"
+        if in_format == "fastq":
+            _sample_fastq(in_file, out_file, in_file_pair=in_file_pair, out_file_pair=out_file_pair, N=sample_size)
+    except:
+        raise
 
 def _open_input_handle(i, mode="r"):
     try:
@@ -152,6 +192,38 @@ def _open_output_handle(output):
         raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
 
     return handle
+
+def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, N=100):
+    """
+    Get N random records from a file in fastq format without reading the whole
+    thing into memory
+    
+    Adapted from:
+    https://github.com/brentp/bio-playground/blob/master/reads-utils/select-random-pairs.py
+    """
+
+    in_fh, out_fh = _open_input_handle(in_file), _open_output_handle(out_file)
+    if in_file_pair and out_file_pair:
+        in_fh_pair, out_fh_pair = _open_input_handle(in_file_pair), _open_output_handle(out_file_pair)
+
+    records = sum(1 for _ in in_fh) / 4
+    rand_records = sorted(random.sample(xrange(records), int(N)))
+
+    rec_no = 0
+    written = 0
+    in_fh.seek(0)
+    for rr in rand_records:
+        while rec_no < rr:
+            for i in range(4): in_fh.readline()
+            if in_file_pair:
+                for i in range(4): in_fh_pair.readline()
+            rec_no += 1
+        for i in range(4):
+            out_fh.write(in_fh.readline())
+            if in_file_pair and out_file_pair:
+                out_fh_pair.write(in_fh_pair.readline())
+        rec_no += 1
+        written += 1
 
 def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
     """

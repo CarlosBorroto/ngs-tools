@@ -10,6 +10,7 @@ Available commands are:
     merge-fna-qual      Merge 454's Fasta and Quality files into a Fastq file.
     split-by-barcode    Split Fasta or Fastq files using barcodes.
     seq-convert         Convert one sequence format to another.
+    sample              Randomly subsample records.
 """
 
 import sys
@@ -18,7 +19,7 @@ try:
 except ImportError:
     sys.exit("""Error: docopt is required by ngs-tools.
 https://pypi.python.org/pypi/docopt""")
-from commands import merge_fna_qual, split_by_barcode, seq_convert
+from commands import merge_fna_qual, split_by_barcode, seq_convert, sample
 
 def main():
     try:
@@ -30,6 +31,8 @@ def main():
             split_by_barcode([options['<command>']] + options['<args>'])
         elif options['<command>'] == 'seq-convert':
             seq_convert([options['<command>']] + options['<args>'])
+        elif options['<command>'] == 'sample':
+            sample([options['<command>']] + options['<args>'])
         else:
             exit("%r is not a ngs-tools command. See 'ngs-tools --help'." % options['<command>'])
     except KeyboardInterrupt:
