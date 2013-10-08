@@ -1,13 +1,28 @@
 <?xml version="1.0"?>
 <tool_dependency>
-    <package name="biopython" version="1.62">
-        <repository name="package_biopython_1_62" owner="biopython" prior_installation_required="True" />
-    </package>
     <package name="ngs-tools" version="0.1.6">
+        <readme>
+This Galaxy Tool Shed package installs ngs-tools. This requires and assumes a
+standard C compiler is already installed, along with the Python header files.
+
+Development of this dependency definition is being done here on GitHub:
+https://github.com/cjav/ngs-tools/tree/master/galaxy-tools
+        </readme>
         <install version="1.0">
+            <action type="set_environment_for_install">
+                <repository name="package_biopython_1_62" owner="biopython">
+                    <package name="biopython" version="1.62" />
+                </repository>
+            </action>
             <actions>
-                <action type="setup_virtualenv">ngs-tools==0.1.6</action>
+                <action type="setup_virtualenv">
+docopt==0.6.1
+biopython==1.62
+python-levenshtein==0.10.2
+ngs-tools==0.1.6
+                </action>
             </actions>
         </install>
+
     </package>
 </tool_dependency>
