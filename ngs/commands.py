@@ -116,7 +116,7 @@ options:
     """
 
     options_seq_convert = docopt(seq_convert.__doc__, argv=options)
-    inputs = options_seq_convert['<input_file>']
+    inputs = options_seq_convert['<input_file>'] if options_seq_convert['<input_file>'] else [None]
     output = options_seq_convert['--output']
     in_format = options_seq_convert['--input-format']
     out_format = options_seq_convert['--output-format']
