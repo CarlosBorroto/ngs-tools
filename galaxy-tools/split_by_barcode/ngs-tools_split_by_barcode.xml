@@ -45,7 +45,7 @@
 	</inputs>
 	
 	<outputs>
-		<data format="interval" name="output1" />
+		<data format="tabular" name="output1" />
 	</outputs>
 <help>
 
