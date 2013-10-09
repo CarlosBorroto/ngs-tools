@@ -1,0 +1,64 @@
+<tool id="ngs-tools_sample" name="Sample (ngs-tools)" version="1.0.0">
+	<description></description>
+    <requirements>
+        <requirement type="package" version="0.1.7">ngs-tools</requirement>
+    </requirements>
+    <command>
+        ngs-tools sample
+            --input-format $input_format.format
+            --sample-size $size
+            --output $output_file
+            #if str($input_format.paired.paired_selector) == "True"
+                --output-pair $output_file_pair
+            #end if
+            $input_format.paired.input_file
+            #if str($input_format.paired.paired_selector) == "True"
+                $input_format.paired.input_file_pair
+            #end if
+    </command>
+    <inputs>
+        <conditional name="input_format">
+            <param name="format" type="select" label="Input format">
+                <option value="fastq" selected="true">Fastq</option>
+            </param>
+            <when value="fastq">
+                <conditional name="paired">
+                    <param name="paired_selector" type="select" label="Paired data?">
+                        <option value="True">Yes</option>
+                        <option value="False" selected="true">No</option>
+                    </param>
+                    <when value="True">
+                        <param name="input_file" type="data" format="fastq" label="FASTQ File to sample from" />
+                        <param name="input_file_pair" type="data" format="fastq" label="FASTQ Paired File to sample from" />
+                    </when>
+                    <when value="False">
+                        <param name="input_file" type="data" format="fastq" label="FASTQ File to sample from" />
+                    </when>
+                </conditional>
+            </when>
+        </conditional>
+        <param name="size" type="integer" size="6" value="100" label="Number of records to sample" />
+    </inputs>
+    <outputs>
+        <data name="output_file" format="input" />
+        <data name="output_file_pair" format="input">
+            <filter>input_format['paired']['paired_selector'] == "True"</filter>
+        </data> 
+    </outputs>
+<help>
+
+**What it does**
+
+This tool samples a random number of records from the input file(s). Supports
+paired data assuming paired files are in sync.
+
+Supported formats: FASTQ.
+
+--------
+
+This tool is based on `ngs-tools`__ by Carlos Borroto &lt;carlos.borroto@gmail.com&gt;.
+
+ .. __: https://github.com/cjav/ngs-tools/
+ 
+</help>
+</tool>
