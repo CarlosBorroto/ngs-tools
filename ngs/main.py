@@ -23,7 +23,7 @@ from commands import merge_fna_qual, split_by_barcode, seq_convert, sample
 
 def main():
     try:
-        options = docopt(__doc__, version='0.1.6', options_first=True)
+        options = docopt(__doc__, version='0.1.7', options_first=True)
 
         if options['<command>'] == 'merge-fna-qual':
             merge_fna_qual([options['<command>']] + options['<args>'])
