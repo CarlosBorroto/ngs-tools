@@ -37,7 +37,7 @@
         <param format="tabular" name="barcode_index" type="data" label="Barcodes index" help="See below for description." />
         <param name="barcode_length" type="integer" size="3" value="11" label="Barcode length" help="Please specify the barcode length." />
         <param name="barcodes" type="text" label="Barcodes to use" help="Comma separated list of barcodes to use. By default all barcodes in the 'Barcodes index' are used." />
-        <param name="trim_barcode" type="select" label="Trim the barcode" help="By default barcodes are trimmed from the resulting splitted datasets">
+        <param name="trim_barcode" type="select" label="Trim the barcode" help="By default barcodes are trimmed from the resulting split datasets">
             <option value="" selected="true">Yes</option>
             <option value="--keep-barcode">No</option>
         </param>
@@ -47,7 +47,7 @@
 	<outputs>
 		<data format="tabular" name="output1" />
 	</outputs>
-<help>
+    <help>
 
 **What it does**
 
@@ -80,5 +80,5 @@ This tool is based on `ngs-tools`__ by Carlos Borroto &lt;carlos.borroto@gmail.c
 
  .. __: https://github.com/cjav/ngs-tools/
  
-</help>
+    </help>
 </tool>

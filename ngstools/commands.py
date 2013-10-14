@@ -233,7 +233,7 @@ def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, size
         written += 1
 
 
-def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, format="fasta", max_distance=3,
+def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, input_format="fasta", max_distance=3,
                  barcode_size=11, keep_barcode=False):
     """
     Given a fasta/fastq set of reads files and a file with the barcode index. Create one 
@@ -252,16 +252,16 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
     try:
         if galaxy_id:
             outfs = dict(
-                [(g, open("{0}/primary_{1}_{2}_visible_{3}".format(output, galaxy_id, g, format), "w")) for g in
+                [(g, open("{0}/primary_{1}_{2}_visible_{3}".format(output, galaxy_id, g, input_format), "w")) for g in
                  index.barcode_names + ["Unassigned"]])
         else:
             outfs = dict(
-                [(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, format), "w")) for g in
+                [(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, input_format), "w")) for g in
                  index.barcode_names + ["Unassigned"]])
         try:
             f = fileinput.input(input_files)
             try:
-                for r in SeqIO.parse(f, format):
+                for r in SeqIO.parse(f, input_format):
                     barcode_name = index.find_barcode(str(r.seq[:barcode_size]))
                     if barcode_name is not None:
                         barcode_name = barcode_name
@@ -269,7 +269,7 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
                             r = r[barcode_size:]
                     else:
                         barcode_name = "Unassigned"
-                    SeqIO.write([r], outfs[barcode_name], format)
+                    SeqIO.write([r], outfs[barcode_name], input_format)
                     counts[barcode_name] += 1
 
                 report = sorted(counts.items(), key=lambda t: t[0] == "Unassigned")
