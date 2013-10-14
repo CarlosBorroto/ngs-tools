@@ -1,8 +1,10 @@
 from setuptools import setup
 
+version = __import__('ngstools.version').get_version()
+
 setup(
     name='ngs-tools',
-    version='0.1.7',
+    version=version,
     author='Carlos Borroto',
     author_email='carlos.borroto@gmail.com',
     url="https://github.com/cjav/ngs-tools",

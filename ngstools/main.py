@@ -14,6 +14,7 @@ Available commands are:
 """
 
 import sys
+
 try:
     from docopt import docopt
 except ImportError:
@@ -21,10 +22,12 @@ except ImportError:
 https://pypi.python.org/pypi/docopt""")
 from commands import merge_fna_qual, split_by_barcode, seq_convert, sample
 
+version = __import__('ngstools.version').get_version()
+
 
 def main():
     try:
-        options = docopt(__doc__, version='0.1.7', options_first=True)
+        options = docopt(__doc__, version=version, options_first=True)
 
         if options['<command>'] == 'merge-fna-qual':
             merge_fna_qual([options['<command>']] + options['<args>'])
@@ -42,5 +45,4 @@ def main():
         print e
 
 if __name__ == '__main__':
-        main()
-
+    main()
