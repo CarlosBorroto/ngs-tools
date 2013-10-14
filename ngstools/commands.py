@@ -1,28 +1,28 @@
-import sys, os, random
+import sys
+import random
 import fileinput
 import warnings
 import collections
 
-# import python-levenshtein
+
 try:
     import Levenshtein
 except ImportError:
     sys.exit("""Error: Python Levenshtein is required by 'ngs-tools'
 https://pypi.python.org/pypi/python-Levenshtein""")
 
-# import docopt
 try:
     from docopt import docopt
 except ImportError:
     sys.exit("""Error: docopt is required by 'ngs-tools'.
 https://pypi.python.org/pypi/docopt""")
 
-#import SeqIO from Bio (biopython)
 try:
     from Bio import SeqIO
 except ImportError:
     sys.exit("""Error: Biopython is required by 'ngs-tools'.
 https://pypi.python.org/pypi/biopython""")
+
 
 def merge_fna_qual(options):
     """
@@ -40,14 +40,15 @@ options:
         with _open_output_handle(options_merge_fna_qual['--output']) as o:
             try:
                 with open(options_merge_fna_qual['<fna_file>']) as f:
-                    with open(options_merge_fna_qual['<qual_file>']) as q: 
+                    with open(options_merge_fna_qual['<qual_file>']) as q:
                         records = SeqIO.QualityIO.PairedFastaQualIterator(f, q)
-                        count = SeqIO.write(records, o, "fastq")
+                        SeqIO.write(records, o, "fastq")
             except IOError as e:
                 print "Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror)
                 raise ValueError("Please provide valid <fna_file> and <qual_file>.")
     except:
         raise
+
 
 def split_by_barcode(options):
     """
@@ -69,12 +70,12 @@ options:
                                           looking for mutated barcodes
                                           [default: 3].
   -s INTEGER --barcode-size=INTEGER       Barcode size [default: 11].
-  -p PREFIX --prefix=PREFIX               Prefix for splitted output files.
-  -g GALAXY_ID --galaxy=GALAXY_ID         Name splitted output files in away
+  -p PREFIX --prefix=PREFIX               Prefix for split output files.
+  -g GALAXY_ID --galaxy=GALAXY_ID         Name split output files in away
                                           compatible with galaxy multiple
                                           outputs.
   -r REPORT_OUTPUT --report=REPORT_OUTPUT Write report output to REPORT_OUTPUT.
-  -o OUTPUT --output=OUTPUT               Write splitted output files to OUTPUT
+  -o OUTPUT --output=OUTPUT               Write split output files to OUTPUT
                                           directory [default: .]
     """
 
@@ -103,6 +104,7 @@ options:
     except:
         raise
 
+
 def seq_convert(options):
     """
 usage: ngs-tools seq-convert [options] [--] [<input_file>...]
@@ -124,15 +126,16 @@ options:
     try:
         with _open_output_handle(output) as out_fh:
             for i in inputs:
-                mode = "rb" if in_format in ['abi'] else "r" 
+                mode = "rb" if in_format in ['abi'] else "r"
                 try:
                     with _open_input_handle(i, mode=mode) as in_fh:
-                            seqs = SeqIO.parse(in_fh, in_format)
-                            SeqIO.write(seqs, out_fh, out_format)
+                        seqs = SeqIO.parse(in_fh, in_format)
+                        SeqIO.write(seqs, out_fh, out_format)
                 except:
                     raise
     except:
         raise
+
 
 def sample(options):
     """
@@ -153,23 +156,23 @@ options:
     Supported formats: fastq.
     """
 
-    SUPPORTED_FORMATS = ['fastq']
+    supported_formats = ['fastq']
     options_sample = docopt(sample.__doc__, argv=options)
     in_file = options_sample['<input_file>']
     in_file_pair = options_sample['<paired_input_file>']
     out_file = options_sample['--output']
     out_file_pair = options_sample['--output-pair']
     in_format = options_sample['--input-format']
-    if in_format not in SUPPORTED_FORMATS:
+    if in_format not in supported_formats:
         raise ValueError("Unsupported format provided: '{0}'.".format(in_format))
     sample_size = options_sample['--sample-size']
 
     try:
-        mode = "r"
         if in_format == "fastq":
-            _sample_fastq(in_file, out_file, in_file_pair=in_file_pair, out_file_pair=out_file_pair, N=sample_size)
+            _sample_fastq(in_file, out_file, in_file_pair=in_file_pair, out_file_pair=out_file_pair, size=sample_size)
     except:
         raise
+
 
 def _open_input_handle(i, mode="r"):
     try:
@@ -182,6 +185,7 @@ def _open_input_handle(i, mode="r"):
 
     return handle
 
+
 def _open_output_handle(output):
     try:
         if output:
@@ -193,7 +197,8 @@ def _open_output_handle(output):
 
     return handle
 
-def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, N=100):
+
+def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, size=100):
     """
     Get N random records from a file in fastq format without reading the whole
     thing into memory
@@ -207,16 +212,18 @@ def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, N=10
         in_fh_pair, out_fh_pair = _open_input_handle(in_file_pair), _open_output_handle(out_file_pair)
 
     records = sum(1 for _ in in_fh) / 4
-    rand_records = sorted(random.sample(xrange(records), int(N)))
+    rand_records = sorted(random.sample(xrange(records), int(size)))
 
     rec_no = 0
     written = 0
     in_fh.seek(0)
     for rr in rand_records:
         while rec_no < rr:
-            for i in range(4): in_fh.readline()
+            for i in range(4):
+                in_fh.readline()
             if in_file_pair:
-                for i in range(4): in_fh_pair.readline()
+                for i in range(4):
+                    in_fh_pair.readline()
             rec_no += 1
         for i in range(4):
             out_fh.write(in_fh.readline())
@@ -225,7 +232,9 @@ def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, N=10
         rec_no += 1
         written += 1
 
-def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, format="fasta", max_distance=3, barcode_size=11, keep_barcode=False):
+
+def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, format="fasta", max_distance=3,
+                 barcode_size=11, keep_barcode=False):
     """
     Given a fasta/fastq set of reads files and a file with the barcode index. Create one 
     fasta/fastq file for each barcode_name based on the closest matching barcode.
@@ -237,23 +246,27 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
         index = BarcodeIndex(barcode_file, barcode_list, max_distance, barcode_size)
     except:
         raise
- 
+
     counts = collections.defaultdict(int)
- 
+
     try:
         if galaxy_id:
-            outfs = dict([(g, open("{0}/primary_{1}_{2}_visible_{3}".format(output, galaxy_id, g, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+            outfs = dict(
+                [(g, open("{0}/primary_{1}_{2}_visible_{3}".format(output, galaxy_id, g, format), "w")) for g in
+                 index.barcode_names + ["Unassigned"]])
         else:
-            outfs = dict([(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, format), "w")) for g in index.barcode_names + ["Unassigned"]])
+            outfs = dict(
+                [(g, open("{0}/{1}{2}.ld.{3}.{4}".format(output, prefix, g, max_distance, format), "w")) for g in
+                 index.barcode_names + ["Unassigned"]])
         try:
             f = fileinput.input(input_files)
             try:
                 for r in SeqIO.parse(f, format):
                     barcode_name = index.find_barcode(str(r.seq[:barcode_size]))
-                    if barcode_name != None:
+                    if barcode_name is not None:
                         barcode_name = barcode_name
                         if not keep_barcode:
-                            r = r[barcode_size:] 
+                            r = r[barcode_size:]
                     else:
                         barcode_name = "Unassigned"
                     SeqIO.write([r], outfs[barcode_name], format)
@@ -264,13 +277,14 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
                 f.close()
         except IOError as e:
             raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
-        finally:            
+        finally:
             for o in outfs.values():
                 o.close()
     except IOError as e:
         raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
 
     return report
+
 
 class BarcodeIndex:
     """
@@ -279,6 +293,7 @@ class BarcodeIndex:
     Adapted from:
     https://gist.github.com/dgrtwo/3725741
     """
+
     def __init__(self, barcode_file, barcode_list, max_distance=3, barcode_size=11):
         self.cache = {}
         self.barcode_size = barcode_size
@@ -302,15 +317,17 @@ class BarcodeIndex:
             self.barcode_names = self.cache.values()
             barcode_missing = list(set(barcode_list) - set(self.barcode_names))
             if barcode_missing:
-                print "Some barcodes could not be found in the <barcode_file> file. Barcodes not present: {0}".format(barcode_missing)
-                raise ValueError("Please check if this is the correct <barcode_file> or the barcodes are spelled correctly.")
+                print "Some barcodes could not be found in the <barcode_file> file. Barcodes not present: {0}".format(
+                    barcode_missing)
+                raise ValueError(
+                    "Please check if this is the correct <barcode_file> or the barcodes are spelled correctly.")
         except IOError as e:
             print "Cannot open file '{0}'. Error: {1}".format(e.filename, e.strerror)
             raise ValueError("Please supply a valid <barcode_file>.")
         except ValueError:
             raise
         self.max_distance = max_distance
- 
+
     def find_barcode(self, barcode):
         """
         match barcode and return the barcode_name it's supposed to be in. If
@@ -321,18 +338,18 @@ class BarcodeIndex:
         exact = self.cache.get(barcode)
         if exact is not None:
             return exact
- 
+
         # find the Levenshtein distance to each
         distances = [Levenshtein.distance(barcode, b) for b in self.barcodes]
         best = min(distances)
         # check if there's a tie or the distance is too great:
         if best > self.max_distance or distances.count(best) > 1:
             return None
-        # otherwise, return the best one, after caching it for future use
+            # otherwise, return the best one, after caching it for future use
         ret = self.barcode_names[distances.index(best)]
         self.cache[barcode] = ret
         return ret
 
+
 if __name__ == '__main__':
     exit()
-

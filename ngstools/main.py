@@ -21,6 +21,7 @@ except ImportError:
 https://pypi.python.org/pypi/docopt""")
 from commands import merge_fna_qual, split_by_barcode, seq_convert, sample
 
+
 def main():
     try:
         options = docopt(__doc__, version='0.1.7', options_first=True)

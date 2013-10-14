@@ -6,7 +6,7 @@ setup(
     author='Carlos Borroto',
     author_email='carlos.borroto@gmail.com',
     url="https://github.com/cjav/ngs-tools",
-    packages=['ngs', 'ngs.test'],
+    packages=['ngstools', 'ngstools.test'],
     scripts=["scripts/ngs-tools"],
     description='Compilation of tools for processing NGS sequencing data..',
     long_description=open('README.md').read(),
