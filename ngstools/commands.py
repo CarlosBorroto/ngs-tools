@@ -8,20 +8,18 @@ import collections
 try:
     import Levenshtein
 except ImportError:
-    sys.exit("""Error: Python Levenshtein is required by 'ngs-tools'
-https://pypi.python.org/pypi/python-Levenshtein""")
+    raise ImportError(
+        "Python 'Levenshtein' is required by 'ngs-tools'. https://pypi.python.org/pypi/python-Levenshtein")
 
 try:
     from docopt import docopt
 except ImportError:
-    sys.exit("""Error: docopt is required by 'ngs-tools'.
-https://pypi.python.org/pypi/docopt""")
+    raise ImportError("'docopt' is required by 'ngs-tools'. https://pypi.python.org/pypi/docopt")
 
 try:
     from Bio import SeqIO
 except ImportError:
-    sys.exit("""Error: Biopython is required by 'ngs-tools'.
-https://pypi.python.org/pypi/biopython""")
+    raise ImportError("'Biopython' is required by 'ngs-tools'. https://pypi.python.org/pypi/biopython")
 
 
 def merge_fna_qual(options):
@@ -44,8 +42,7 @@ options:
                         records = SeqIO.QualityIO.PairedFastaQualIterator(f, q)
                         SeqIO.write(records, o, "fastq")
             except IOError as e:
-                print "Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror)
-                raise ValueError("Please provide valid <fna_file> and <qual_file>.")
+                raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
     except:
         raise
 
@@ -181,7 +178,7 @@ def _open_input_handle(i, mode="r"):
         else:
             handle = sys.stdin
     except IOError as e:
-        raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
+        raise ValueError("Cannot open input file '{0}'. {1}".format(e.filename, e.strerror))
 
     return handle
 
@@ -193,7 +190,7 @@ def _open_output_handle(output):
         else:
             handle = sys.stdout
     except IOError as e:
-        raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
+        raise ValueError("Cannot open output file '{0}'. {1}".format(e.filename, e.strerror))
 
     return handle
 
@@ -233,7 +230,8 @@ def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, size
         written += 1
 
 
-def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, input_format="fasta", max_distance=3,
+def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, output, input_format='fasta',
+                 max_distance=3,
                  barcode_size=11, keep_barcode=False):
     """
     Given a fasta/fastq set of reads files and a file with the barcode index. Create one 
@@ -276,12 +274,12 @@ def _split_reads(input_files, barcode_file, barcode_list, prefix, galaxy_id, out
             finally:
                 f.close()
         except IOError as e:
-            raise ValueError("Cannot open input file '{0}'. Error: {1}.".format(e.filename, e.strerror))
+            raise ValueError("Cannot open input file '{0}'. {1}".format(e.filename, e.strerror))
         finally:
             for o in outfs.values():
                 o.close()
     except IOError as e:
-        raise ValueError("Cannot open output file '{0}'. Error: {1}.".format(e.filename, e.strerror))
+        raise ValueError("Cannot open output file '{0}'. {1}".format(e.filename, e.strerror))
 
     return report
 
@@ -317,13 +315,11 @@ class BarcodeIndex:
             self.barcode_names = self.cache.values()
             barcode_missing = list(set(barcode_list) - set(self.barcode_names))
             if barcode_missing:
-                print "Some barcodes could not be found in the <barcode_file> file. Barcodes not present: {0}".format(
-                    barcode_missing)
                 raise ValueError(
-                    "Please check if this is the correct <barcode_file> or the barcodes are spelled correctly.")
+                    "Some barcodes could not be found in the <barcode_file> file. Barcodes not present: {0}".format(
+                        barcode_missing))
         except IOError as e:
-            print "Cannot open file '{0}'. Error: {1}".format(e.filename, e.strerror)
-            raise ValueError("Please supply a valid <barcode_file>.")
+            raise ValueError("Cannot open <barcode_file> '{0}'. {1}".format(e.filename, e.strerror))
         except ValueError:
             raise
         self.max_distance = max_distance
