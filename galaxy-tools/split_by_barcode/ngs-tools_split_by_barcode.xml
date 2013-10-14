@@ -1,7 +1,7 @@
 <tool id="ngs-tools_split_by_barcode" name="Barcode Splitter (ngs-tools)" force_history_refresh="True" version="1.0.1">
 	<description></description>
     <requirements>
-        <requirement type="package" version="0.1.6">ngs-tools</requirement>
+        <requirement type="package" version="0.1.8">ngs-tools</requirement>
     </requirements>
     <command>
         ngs-tools split-by-barcode

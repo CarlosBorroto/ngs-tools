@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <tool_dependency>
-    <package name="ngs-tools" version="0.1.7">
-        <repository name="package_ngs_tools_0_1_7" owner="cjav" prior_installation_required="True" />
+    <package name="ngs-tools" version="0.1.8">
+        <repository name="package_ngs_tools_0_1_8" owner="cjav" prior_installation_required="True" />
     </package>
 </tool_dependency>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<tool_dependency>
+    <package name="ngs-tools" version="0.1.8">
+        <readme>
+This Galaxy Tool Shed package installs ngs-tools. This requires and assumes a
+standard C compiler is already installed, along with the Python header files.
+
+Development of this dependency definition is being done here on GitHub:
+https://github.com/cjav/ngs-tools/tree/master/galaxy-tools
+        </readme>
+        <install version="1.0">
+            <actions>
+                <action type="setup_virtualenv">
+docopt==0.6.1
+biopython==1.62
+python-levenshtein==0.10.2
+ngs-tools==0.1.8
+                </action>
+            </actions>
+        </install>
+
+    </package>
+</tool_dependency>
