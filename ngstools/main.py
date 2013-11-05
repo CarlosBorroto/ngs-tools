@@ -11,6 +11,7 @@ Available commands are:
     split-by-barcode    Split Fasta or Fastq files using barcodes.
     seq-convert         Convert one sequence format to another.
     sample              Randomly subsample records.
+    coverage            Coverage report.
 """
 
 import sys
@@ -20,7 +21,7 @@ try:
 except ImportError:
     sys.stderr.write("ERROR: 'docopt' is required by ngs-tools. https://pypi.python.org/pypi/docopt\n")
     sys.exit(1)
-from commands import merge_fna_qual, split_by_barcode, seq_convert, sample
+from commands import merge_fna_qual, split_by_barcode, seq_convert, sample, coverage
 
 version = __import__('ngstools.version').get_version()
 
@@ -37,13 +38,15 @@ def main():
             seq_convert([options['<command>']] + options['<args>'])
         elif options['<command>'] == 'sample':
             sample([options['<command>']] + options['<args>'])
+        elif options['<command>'] == 'coverage':
+            coverage([options['<command>']] + options['<args>'])
         else:
             exit("%r is not a ngs-tools command. See 'ngs-tools --help'." % options['<command>'])
         return 0
     except KeyboardInterrupt:
         return 1
-    except Exception, e:
-        sys.stderr.write("ERROR: {0}.\n".format(str(e)))
+#    except Exception, e:
+#        sys.stderr.write("ERROR: {0}.\n".format(str(e)))
         return 1
 
 

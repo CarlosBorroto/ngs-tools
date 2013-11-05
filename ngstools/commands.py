@@ -1,9 +1,10 @@
 import sys
+import os
 import random
 import fileinput
 import warnings
 import collections
-
+from itertools import repeat
 
 try:
     import Levenshtein
@@ -20,6 +21,11 @@ try:
     from Bio import SeqIO
 except ImportError:
     raise ImportError("'Biopython' is required by 'ngs-tools'. https://pypi.python.org/pypi/biopython")
+
+try:
+    import pysam
+except ImportError:
+    raise ImportError("'pysam' is required by 'ngs-tools'. https://pypi.python.org/pypi/pysam")
 
 
 def merge_fna_qual(options):
@@ -171,6 +177,44 @@ options:
         raise
 
 
+def coverage(options):
+    """
+usage: ngs-tools coverage [options] [--] <bam_file>...
+
+options:
+    -h --help                       Show this screen.
+
+    -o FILENAME --output=FILENAME       Write coverage report to FILENAME.
+    -r FILENAME --regions FILENAME      File with regions in BED format.
+    """
+
+    options_coverage = docopt(coverage.__doc__, argv=options)
+    bam_files = options_coverage['<bam_file>']
+    output = options_coverage['--output']
+    regions_file = options_coverage['--regions']
+
+    try:
+        output_hf = _open_output_handle(output)
+        for bam_file in bam_files:
+            if not os.path.exists(bam_file + '.bai'):
+                pysam.index(bam_file)
+            bam = pysam.Samfile(bam_file, 'rb')
+            if regions_file is not None:
+                guide = _read_regions(regions_file)
+            else:
+                guide = zip(bam.references, repeat(0), bam.lengths)
+            for name, start, end, feature in guide:
+                summed_coverage = 0
+                for column in bam.pileup(name, start, end):
+                    if start <= column.pos < end:
+                        summed_coverage += column.n
+                output_hf.write(
+                        "{0}\t{1}\t{2}\t{3}\t{4:.2f}\n".format(name, start, end, feature, summed_coverage / (end - start)))
+            bam.close()
+    except:
+        raise
+
+
 def _open_input_handle(i, mode="r"):
     try:
         if i:
@@ -193,6 +237,17 @@ def _open_output_handle(output):
         raise ValueError("Cannot open output file '{0}'. {1}".format(e.filename, e.strerror))
 
     return handle
+
+
+def _read_regions(regions_file):
+    with open(regions_file) as regions:
+        for region in regions:
+            if region.startswith('#'):
+                continue
+            if region.startswith('track'):
+                continue
+            name, start, end, feature = region.strip().split('\t')[:4]
+            yield name, int(start), int(end), feature
 
 
 def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, size=100):

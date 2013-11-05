@@ -15,6 +15,7 @@ setup(
     install_requires=[
         "docopt",
         "biopython",
-        "python-levenshtein"
+        "python-levenshtein",
+        "pysam"
     ],
 )
