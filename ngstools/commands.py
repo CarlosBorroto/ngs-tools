@@ -156,10 +156,10 @@ options:
     -s SIZE, --sample-size SIZE         Integer describing how many records to
                                         sample [default: 100].
 
-    Supported formats: fastq.
+    Supported formats: fastq, fasta.
     """
 
-    supported_formats = ['fastq']
+    supported_formats = ['fastq', 'fasta']
     options_sample = docopt(sample.__doc__, argv=options)
     in_file = options_sample['<input_file>']
     in_file_pair = options_sample['<paired_input_file>']
@@ -169,10 +169,11 @@ options:
     if in_format not in supported_formats:
         raise ValueError("Unsupported format provided: '{0}'.".format(in_format))
     sample_size = options_sample['--sample-size']
-
     try:
         if in_format == "fastq":
             _sample_fastq(in_file, out_file, in_file_pair=in_file_pair, out_file_pair=out_file_pair, size=sample_size)
+        if in_format == "fasta":
+            _sample_fasta(in_file, out_file, size=sample_size)
     except:
         raise
 
@@ -281,6 +282,33 @@ def _sample_fastq(in_file, out_file, in_file_pair=None, out_file_pair=None, size
             out_fh.write(in_fh.readline())
             if in_file_pair and out_file_pair:
                 out_fh_pair.write(in_fh_pair.readline())
+        rec_no += 1
+        written += 1
+
+def _sample_fasta(in_file, out_file, size=100):
+    """
+    Get N random records from a file in fastq format without reading the whole
+    thing into memory
+    
+    Adapted from:
+    https://github.com/brentp/bio-playground/blob/master/reads-utils/select-random-pairs.py
+    """
+
+    in_fh, out_fh = _open_input_handle(in_file), _open_output_handle(out_file)
+
+    records = sum(1 for _ in in_fh) / 2
+    rand_records = sorted(random.sample(xrange(records), int(size)))
+
+    rec_no = 0
+    written = 0
+    in_fh.seek(0)
+    for rr in rand_records:
+        while rec_no < rr:
+            for i in range(2):
+                in_fh.readline()
+            rec_no += 1
+        for i in range(2):
+            out_fh.write(in_fh.readline())
         rec_no += 1
         written += 1
 
