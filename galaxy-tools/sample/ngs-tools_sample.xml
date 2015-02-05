@@ -1,4 +1,4 @@
-<tool id="ngs-tools_sample" name="Sample (ngs-tools)" version="1.0.0">
+<tool id="ngs-tools_sample" name="Sample (ngs-tools)" version="1.0.1">
 	<description></description>
     <requirements>
         <requirement type="package" version="0.1.8">ngs-tools</requirement>
@@ -20,6 +20,7 @@
         <conditional name="input_format">
             <param name="format" type="select" label="Input format">
                 <option value="fastq" selected="true">Fastq</option>
+                <option value="fasta">Fasta</option>
             </param>
             <when value="fastq">
                 <conditional name="paired">
@@ -34,6 +35,16 @@
                     <when value="False">
                         <param name="input_file" type="data" format="fastq" label="FASTQ File to sample from" />
                     </when>
+                </conditional>
+            </when>
+            <when value="fasta">
+                <conditional name="paired">
+                  <param name="paired_selector" type="select">
+                        <option value="False">No</option>
+                  </param>
+                  <when value="False">
+                    <param name="input_file" type="data" format="fasta" label="FASTA File to sample from" />
+                  </when>
                 </conditional>
             </when>
         </conditional>
@@ -52,7 +63,7 @@
 This tool samples a random number of records from the input file(s). Supports
 paired data assuming paired files are in sync.
 
-Supported formats: FASTQ.
+Supported formats: FASTQ, FASTA.
 
 --------
 
